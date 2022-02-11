@@ -46,14 +46,4 @@ for (p in posts.abc$id){
 }
 
 
-# References
-# 
-# 1 https://developers.facebook.com/tools/explorer
-# 2 http://romainfrancois.blog.free.fr/?post/2012/01/15/Crawling-facebook-with-R
-# 3 http://www.r-bloggers.com/mining-facebook-data-most-liked-status-and-friendship-network/
-# 4 http://stackoverflow.com/questions/8122879/roauth-on-windows-using-r
-# 5 http://blog.revolutionanalytics.com/2013/11/how-to-analyze-you-facebook-friends-network-with-r.html
-# 6 http://pablobarbera.com/blog/archives/3.html
-# 7 http://thinktostart.com/analyzing-facebook-with-r/
-# 8 http://stackoverflow.com/questions/5573862/accessing-facebook-api-from-r-for-text-mining
-# 9 http://dni-institute.in/blogs/extracting-data-from-facebook-using-r/
+
