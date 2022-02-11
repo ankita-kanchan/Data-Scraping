@@ -1,0 +1,354 @@
+---
+title: "R Classes and Objects"
+output: html_notebook
+---
+
+
+1. S3 Class 
+2. S4 Class 
+3. Reference Class
+
+
+```{r}
+#S3 Class  
+
+#create a list with required variables
+
+emp = list(name="abc",dept="IT",salary=10000) 
+
+#name the class 
+
+class(emp) = "employee"
+
+
+```
+Checking the type of employee
+```{r}
+class(emp)
+```
+```{r}
+#S4 Class 
+
+#setClass() generates s4 class and we can create objects new() 
+
+setClass("employee",slots = list(name="character",dept="character",salary="numeric"))
+
+```
+
+```{r}
+#Reference Class 
+setRefClass("employeee")
+```
+
+### S3 Class 
+
+```{r}
+
+emp = list(name="abc",dept="IT",salary=10000) 
+
+#name the class 
+
+class(emp) = "employee"
+```
+```{r}
+emp
+```
+Constructor in S3 class
+
+```{r}
+employee = function(n,d,s){
+  value = list(name=n,dept=d,salary=s) #setting class values 
+  attr(value,"class") ="employee" #class of value to employee
+  value # returning value
+}
+```
+```{r}
+e = employee("Alex","Dev",20000)
+e
+```
+### How to Write Method
+```{r}
+print.employee = function(obj){
+  cat("Employee name is",obj$name,"\n")
+  cat("Employee Department is",obj$dept,"\n")
+  cat("Employee Salary is",obj$salary,"\n")
+}
+```
+Running our own print method
+```{r}
+print(e)
+```
+```{r}
+salarydata.employee <- function(obj) {
+cat("Your salary is", obj$salary, "\n")
+}
+
+```
+```{r}
+salarydata.employee(e) 
+```
+## S4 Class 
+
+
+```{r}
+#Creating S4 class
+
+student=setClass("student",slots = list(name="character",age="numeric",marks="numeric"))
+```
+```{r}
+#Creating Objects in S4 class
+
+stud1= new("student",name="Alex",age=24,marks=56)
+stud1
+```
+```{r}
+isS4(e)
+```
+```{r}
+#generator function
+stud2=student(name="Jae",age=23,marks=56)
+stud2
+```
+Object is accessed using @ 
+
+### Accessing Slots
+```{r}
+stud1@name
+stud2@name
+
+```
+### Modifying Slots 
+```{r}
+stud1@marks = 78
+stud1
+```
+```{r}
+# using slots function to modify value 
+slot(stud1,"name")
+
+slot(stud1,"name") = "Alexa"
+
+slot(stud1,"name")
+```
+### How to generate S4 method 
+
+```{r}
+#for writing our own s4 function we have to use setMethod() function.
+
+setMethod("show","student",function(obj){
+  cat("Name is ",obj@name,"\n")
+  cat("Age is ",obj@age,"years \n")
+  cat("Marks is ",obj@marks,"\n")
+}
+)
+```
+```{r}
+stud1
+```
+```{r}
+isS4(show)
+```
+```{r}
+setGeneric(name="setMarks",def=function(obj,mark){
+  standardGeneric("setMarks")
+})
+setMethod(f="setMarks","student",function(obj,mark){
+  obj@marks= mark
+  validObject(obj)
+  obj
+}
+)
+```
+
+```{r}
+setMarks(stud1,90)
+```
+## Reference Class
+
+```{r}
+#using setRefClass for creating ref class 
+
+customer = setRefClass("customer",fields = list(name="character",contact="character",category="character",age="numeric",gender="character"))
+
+
+```
+create objects of reference class
+```{r}
+c = customer(name="John",contact="1234567890",category="Sports",age=26,gender="Male")
+c
+
+```
+Accessing Class Variables
+
+```{r}
+#object_name$variable_name 
+c$name
+c$age
+```
+```{r}
+x = list("a"=4,"b"=6)
+y=x
+
+
+y$a=10
+
+x # x is not changeing 
+y # y value is getting changed
+```
+
+```{r}
+
+x =customer(name="Alex",contact="1234567890",category="Sports",age=26,gender="Male")
+y=x
+
+y$name ="Jae"  #y value  i s changing 
+x # x is also changing
+y
+```
+```{r}
+x = customer(name="Alex",contact="1234567890",category="Sports",age=26,gender="Male")
+
+y = x$copy() 
+
+y$name="max"
+
+```
+```{r}
+x
+y
+```
+### Reference Methods 
+
+```{r}
+customer = setRefClass("customer",
+fields = list(name="character",contact="character",category="character",age="numeric",gender="character"),
+methods = list(
+  changeContact=function(cont){
+  contact <<- cont  #non local assignment operator for class variable
+  },
+  customerDetails= function(){
+    cat(age,"\n")
+    cat(category,"\n")
+    cat(gender,"\n")
+  }
+  )
+)
+```
+```{r}
+c1 =customer(name="Alex",contact="1234567890",category="Sports",age=26,gender="Male")
+c1
+```
+```{r}
+c1$changeContact("111111111")
+```
+```{r}
+c1
+```
+```{r}
+c1$customerDetails()
+```
+## Inheritance in R 
+
+### S3 Class Inheritance
+```{r}
+ parent = list(name="abc",data="parent class")
+class(parent) ="parent"
+parent
+```
+```{r}
+print.parent = function(obj){
+  cat(obj$name,"\n")
+  cat("this is ",obj$data,"\n")
+}
+```
+```{r}
+print(parent)
+```
+### Deriving child class using parent class in S3 
+
+```{r}
+child = list(name="xyz",data="child class")
+class(child) =c("child","parent") # own class,parent class
+child
+```
+```{r}
+print.child= function(obj){
+  cat(obj$name," is a object of ",obj$data)
+}
+```
+```{r}
+child
+```
+
+```{r}
+inherits(child,"parent")
+is(child,"parent")
+```
+### S4 Inheritance in R
+```{r}
+employee =setClass("employee",slots = list(name="character",dept="character",salary="numeric"))
+employee
+```
+```{r}
+e1= employee(name="Alex",dept="IT",salary=20000)
+e1
+```
+```{r}
+overseasEmployee= setClass("overseasEmployee",slots=list(country="character"),contains = "employee")
+overseasEmployee
+```
+
+```{r}
+oe = overseasEmployee(name="John",dept="Finance",salary=30000,country = "USA")
+oe
+```
+### Inheritance in Reference Class 
+```{r}
+customer = setRefClass("customer",
+fields = list(name="character",contact="character",category="character",age="numeric",gender="character"),
+methods = list(
+  changeContact=function(cont){
+  contact <<- cont  #non local assignment operator for class variable
+  },
+  customerDetails= function(){
+    cat(age,"\n")
+    cat(category,"\n")
+    cat(gender,"\n")
+  }
+  )
+)
+```
+```{r}
+c1 =customer(name="Alex",contact="1234567890",category="Sports",age=26,gender="Male")
+c1
+```
+Deriving a new class using customer class 
+
+```{r}
+globalCustomers = setRefClass("globalCustomers",fields = list(country="character"),contains = "customer",
+                              methods = list(
+                                changeAddress = function(value){
+                                  country <<- value
+                                }
+                              ))
+globalCustomers
+
+```
+```{r}
+c2 =globalCustomers(name="John",contact="1234567890",category="Sports",age=26,gender="Male",country="US")
+c2
+```
+```{r}
+c2$changeContact("234567890") # using parent class method 
+c2
+```
+
+
+```{r}
+
+c2$changeAddress("US") # Accessing its own function
+c2
+
+```
+
+
