@@ -1,0 +1,206 @@
+---
+title: "Assumptions of Linear Regression"
+output: html_notebook
+---
+
+## Assumption 1 
+
+### Linearity of varibles 
+Data variables should have linear relationship.
+
+parameters of linear regression should be linear.
+
+```{r}
+cars
+```
+```{r}
+scatter.smooth(x=cars$speed,y=cars$dist,main="Dist vs Speed")
+```
+## Assumption 2 
+
+### Mean of residual should be 0 
+
+```{r}
+# lm () is used for building linear model 
+# formula  dept(y) ~ indep(x) => dist ~ speed
+#data => cars 
+
+linear_model = lm(dist ~ speed, data = cars)
+mean(linear_model$residuals)
+
+#mean of residual is close to zero 
+```
+```{r}
+summary(linear_model)
+```
+```{r}
+linear_model
+```
+```{r}
+ypred = predict(linear_model,cars)
+```
+```{r}
+ypred
+```
+
+
+## Assumption 3 
+
+### No Autocorrelation of residuals
+```{r}
+library(ggplot2)
+acf(linear_model$residuals)
+```
+
+```{r}
+pacf(linear_model$residuals)
+```
+
+```{r}
+lmtest::dwtest(linear_model)
+```
+H0 = Residuals are not autocorrelated
+H1 = Residuals are autocorrelated  
+```{r}
+if(0.09522 > 0.05){
+  print("Residuals are not autocorrelated")
+}else{
+  print("Residuals are autocorrelated")
+}
+#p value is less than 0.05 then Ho is rejected and alternate hypothesis is accepted
+
+```
+## Assumption 4 
+
+## x variable and residuals are uncorrelated 
+
+```{r}
+cor.test(cars$speed,linear_model$residuals)
+
+```
+H0 => Residuals and x variable are not correlated
+H1 => Residuals and x variable are  correlated
+```{r}
+if(1 > 0.05){
+  print("Residuals and x variable are not correlated")
+}else{
+  print("Residuals and x variable are  correlated")
+}
+```
+## Assumption 5
+
+### No Multicollinearity
+```{r}
+mtcars
+
+mt_lm = lm(mpg ~ .,data=mtcars)
+mt_lm
+```
+```{r}
+library(corrplot)
+corrplot(cor(mtcars[,-1]))
+```
+```{r}
+library(car)
+vif(mt_lm)
+```
+How to rectify 
+
+1. Remove variable which is having high vif 
+2. Check correlation between your varibles and keep only one pair with high correlation
+
+
+```{r}
+mt_lm_without_disp = lm(mpg ~ cyl+hp+drat+wt+qsec+vs+am+gear+carb,data=mtcars )
+vif(mt_lm_without_disp)
+```
+## Assumption 6 
+### Normality of Residuals 
+
+```{r}
+par(mfrow=c(2,2))
+plot(linear_model,1)
+
+#Residuals vs Fitted Graph 
+#1. Used to check linear assumption  
+#conclusion => A horizontal line without distict pattern it indicates linear relationship => good
+```
+```{r}
+plot(linear_model,2)
+#Normal Q-Q Plot 
+#use : to check the residuals normal distribution 
+#conclution  : if residuals points following dash line then it is good => having normal distribution 
+
+```
+
+```{r}
+plot(linear_model,3)
+
+#Scale Location Plot 
+
+#spread location plot 
+#use : shows spread of residuals along with actual values 
+#conclusion: homoscedasticity -> equal variance of residuals gives horizontal line
+#heteroscadasticity -> variance is not equal and also gives cone shaped pattern or linear pattern
+```
+```{r}
+plot(linear_model,4)
+```
+```{r}
+plot(linear_model)
+#use : identify extreme values impacting models performance 
+```
+
+
+    1. Global Stat This is the overall metric; this states whether the model, as a whole, passes or fails.
+
+    2. Skewness <- measuring the distribution
+
+    3. Kurtosis <- measuring the distribution, outliers, influential data, etc
+
+    4. Link function <- misspecified model, how you linked the elements in the model assignment
+
+    5. Heteroscedasticity <- looking for equal variance in the residuals
+
+```{r}
+gvlma::gvlma(linear_model)
+```
+```{r}
+summary(linear_model)
+
+```
+```{r}
+
+modelSum= summary(linear_model)
+modelSum$coefficients
+```
+```{r}
+estimate = modelSum$coefficients["speed","Estimate"]
+estimate
+
+std_err =modelSum$coefficients["speed","Std. Error"]
+std_err
+
+tstat= estimate/std_err
+tstat
+
+pval = 2*pt(-abs(tstat),df=nrow(cars)-ncol(cars))
+pval
+```
+```{r}
+AIC(linear_model) #lower  
+BIC(linear_model) #lower 
+```
+R- square -> higher 
+Adj R-Square -> higher 
+F-statics -> higher
+std Error -> close to zero 
+t-statistics -> greater than 1.96 for p value less than 0.05 
+AIC -> lower 
+BIC -> lower 
+MAPE -> lower 
+MSE -> lower 
+RMSE -> lower 
+Min Max Accuracy -> Higher 
+
+
