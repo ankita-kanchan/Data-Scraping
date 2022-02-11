@@ -1,0 +1,76 @@
+---
+title: "Data Sampling"
+output: html_notebook
+---
+## Probilistic Sampling Methods
+1. Simple Random Sampling 
+2. Systematic Sampling 
+3. Stratified Sampling
+4. Cluster Sampling
+
+### Simple Random Sampling 
+```{r}
+
+data = 1:10
+data
+
+#sample function for random sampling 
+
+#sample(data,size,replace=FALSE)
+
+#without replacement - > each elem in population has single chance to be part of the sample
+sample(data,10)
+
+#with replacement - > each elem in population has multiple chance to be part of the sample
+sample(data,10,replace = TRUE)
+
+```
+### Systematic Sampling 
+Systematic Sampling is used when population data is in ordered format or arrange in time(observation recorded on time) 
+```{r}
+library(TeachingSampling)
+
+```
+```{r}
+data = c(1:12)
+data
+
+
+
+#systematic sample from data (population) of 12 records with 2 interval values are added in sample
+# S.SY(no of sample,interval)
+sys_sample = S.SY(12,2)
+sys_sample
+
+data[sys_sample]
+```
+### Stratified Sampling 
+```{r}
+library(dplyr)
+data("iris") 
+iris
+
+```
+```{r}
+iris %>% group_by(Species) %>% sample_n(.,10) 
+
+```
+```{r}
+
+library(sampling)
+
+sample_data = strata(iris,c("Species"),size=c(10,10,10),method="srswor")
+sample_data
+
+#srswor - simple random sampling without replacement
+#srswr  - simple random sampling with replacement
+#systematic - systemic sampling
+```
+```{r}
+cluster_sample =cluster(iris,c("Species"),size = 1,method='srswr')
+cluster_sample
+
+cl_iris = getdata(iris,cluster_sample)
+cl_iris
+```
+
