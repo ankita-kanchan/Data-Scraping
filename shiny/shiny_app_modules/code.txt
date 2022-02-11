@@ -1,0 +1,181 @@
+# click and nearpoints
+
+ui <- fluidPage(
+  plotOutput("myplot",click ="myplot_click"),
+  verbatimTextOutput("data"),
+  tableOutput("near_data")
+)
+
+server <- function(input, output) {
+ output$myplot = renderPlot({
+   plot(cars$speed,cars$dist)
+ })
+
+ output$data=renderPrint({
+   req(input$myplot_click)
+   x = input$myplot_click$x
+   y =input$myplot_click$y 
+   cat("x:",x,"y:",y)
+ }
+ )
+ 
+ output$near_data = renderTable({
+   nearPoints(cars,input$myplot_click,xvar = "speed",yvar = "dist")
+ })
+    
+}
+
+#brush 
+
+ui <- fluidPage(
+  plotOutput("myplot",brush ="myplot_brush"),
+  tableOutput("data")
+)
+
+server <- function(input, output) {
+ output$myplot = renderPlot({
+   plot(cars$speed,cars$dist)
+ })
+
+ output$data = renderTable({
+   brushedPoints(cars,input$myplot_brush,xvar = "speed",yvar = "dist")
+ })
+    
+}
+
+# dynamic height and width 
+ui <- fluidPage(
+  sliderInput("height","height",min=100,max=500,value=300),
+  sliderInput("width","width",min=100,max=500,value=300),
+  plotOutput("myplot",brush ="myplot_brush"),
+  
+)
+
+server <- function(input, output) {
+  
+ output$myplot = renderPlot(
+   width = function() input$width,
+   height = function() input$height,
+   {
+   plot(cars$speed,cars$dist)
+ })
+    
+}
+
+#Image Output and HTML output
+
+library(shiny)
+
+ui <- fluidPage(
+  imageOutput("myimage"),
+  htmlOutput("code")
+)
+
+server <- function(input, output) {
+  
+ output$myimage = renderImage(
+   {
+     list(
+       src=file.path("C://Users//ankit//Documents//flower.jpg"),
+       contentType="image/jpeg",
+       width=400,
+       height=600
+     )
+   }
+ )
+ 
+ output$code = renderUI(
+   HTML(glue::glue(
+     "<p>Hello  Users</p>"
+   ))
+ )
+    
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+
+
+
+#validation example
+ui <- fluidPage(
+  shinyFeedback::useShinyFeedback(),
+  numericInput("num","Enter the number",value=10),
+  textOutput("data")
+  
+)
+
+server <- function(input, output) {
+  data = reactive({
+    even = input$num %%2 ==0
+    #1. inputId , exp ,message
+    shinyFeedback::feedbackDanger("num",!even,"Please Select an even number")
+    input$n
+  })
+    output$data = renderText(data())
+}
+#notifications
+ui <- fluidPage(
+  actionButton("click","Click here")
+ 
+)
+
+server <- function(input, output) {
+  
+  observeEvent(input$click,{
+    showNotification("Hello User, Notification demo!!")
+    Sys.sleep(1)
+    showNotification("This is message notfication",type="message" )
+    Sys.sleep(1)
+    showNotification("This is waring notfication",type="warning" )
+    Sys.sleep(1)
+    showNotification("This is error notfication",type="error" )
+  })
+}
+
+#waiter
+ui <- fluidPage(
+  waiter::use_waiter(),
+  actionButton("click","Click here"),
+ textOutput("demo")
+)
+
+server <- function(input, output) {
+  
+  data = eventReactive(
+    input$click,{
+      waiter = waiter::Waiter$new()
+      waiter$show()
+      on.exit(waiter$hide())
+      Sys.sleep(1)
+      runif(1)
+    }
+  )
+  output$demo = renderText( data())
+ 
+}
+
+#Modal Configuration
+ui <- fluidPage(
+
+  actionButton("subscribe","Click here to Subscribe"),
+)
+
+server <- function(input, output) {
+  modal_accept = modalDialog(
+    "Are your sure?",
+    title = "Subscribe to website",
+    footer = tagList(
+      actionButton("cancel","Cancel"),
+      actionButton("accept","Subscribe",class="btn btn-info")
+    )
+  )
+  observeEvent(input$subscribe,{
+    showModal(modal_accept)
+  })
+  
+  observeEvent(input$cancel,{
+    removeModal(modal_accept)
+  })
+ 
+}

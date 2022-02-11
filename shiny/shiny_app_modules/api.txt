@@ -1,0 +1,290 @@
+import 'dart:convert';
+
+import 'package:finixapp/data/models/advertisement_model.dart';
+import 'package:finixapp/data/models/common_model.dart';
+import 'package:finixapp/data/models/finix_history_model.dart';
+import 'package:finixapp/data/models/finix_rate_model.dart';
+import 'package:finixapp/data/models/login_modal.dart';
+import 'package:finixapp/data/models/payout_request_model.dart';
+import 'package:finixapp/data/models/settings_model.dart';
+import 'package:finixapp/data/models/user_notification_model.dart';
+import 'package:finixapp/data/models/user_profile_model.dart';
+import 'package:finixapp/data/models/user_transaction_model.dart';
+import 'package:finixapp/utils/constants.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/retry.dart';
+
+class ApiService {
+  static var client = RetryClient(
+    http.Client(),
+  );
+
+  //Login Method
+  static Future<LoginModel> login(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/auth/login"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return loginModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //Get Advertisement
+  static Future<AdvertisementModel> getAdvertisement() async {
+    var response = await client.get(
+      Uri.parse(Constants.server_url + "/common/viewAdvertisement"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return advertisementModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //Register User
+  static Future<CommonModel> register(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/auth/registeruser"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return commonModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //Forgot Password
+  static Future<CommonModel> forgotPassword(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/auth/sendOTP"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return commonModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //Reset Password
+  static Future<CommonModel> resetPassword(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/auth/resetPassword"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return commonModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //Change Password
+  static Future<CommonModel> changePassword(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/profile/changePassword"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return commonModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //Update User Profile
+  static Future<CommonModel> updateUserProfile(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/profile/updateUserProfileDetails"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return commonModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //View User Profile Details
+  static Future<UserProfileModel> getUserProfile(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/profile/viewUserProfileDetails"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return userProfileModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+  // Payout
+
+  //View User Payout Request
+  static Future<PayoutRequestModel> getUserPayoutRequests(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/payout/viewUserAllPayoutRequests"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return payoutRequestModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //Add User Payout Request
+  static Future<CommonModel> addUserPayoutRequest(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/payout/userAddPayoutRequest"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return commonModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //User Buy Finix Coins
+  static Future<CommonModel> buyUserFinix(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/user/userBuyFinix"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return commonModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //Dashboard
+  static Future<UserTransactionModel> getUserTransactions(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/user/userTransaction"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return userTransactionModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<UserNotificationModel> getUserNotifications(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/user/getNotificationsUser"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return userNotificationModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  //Common
+  static Future<FinixRateModel> getCurrentFinixRate(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/common/getFinixRate"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return finixRateModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<SettingsModel> getSettings(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/common/getGeneralSettings"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return settingsModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<FinixHistoryModel> getFinixHistory(jsonArray) async {
+    var response = await client.post(
+      Uri.parse(Constants.server_url + "/common/getFinixCoinHistory"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonArray),
+    );
+
+    if (response.statusCode == 200) {
+      return finixHistoryModelFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
+}
