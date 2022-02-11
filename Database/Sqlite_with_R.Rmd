@@ -1,0 +1,151 @@
+---
+title: "SQLite with R"
+output: html_notebook
+---
+
+```{r}
+library(RSQLite) 
+```
+## Connecting to SQLite 
+```{r}
+#Connecting to new sqlite database 
+
+# first param  = database driver
+#second param  = sqlite file
+conn = dbConnect(RSQLite::SQLite(),"mySQLite.db")
+```
+Creating mtcars data for table
+```{r}
+data("mtcars")
+mtcars["car_names"] = rownames(mtcars)
+rownames(mtcars) = c() # reindexing 
+
+```
+```{r}
+rownames(mtcars)
+```
+Creating SQLite Table using dataframe 
+```{r}
+dbWriteTable(conn,"tbl_mtcars",mtcars)
+
+```
+
+List of all available tables in sqlite database 
+```{r}
+dbListTables(conn)
+```
+### Executing SQL Queries 
+
+```{r}
+dbGetQuery(conn,"Select * from tbl_mtcars")
+```
+
+```{r}
+#getting first 5 rows of the table
+dbGetQuery(conn,"Select * from tbl_mtcars LIMIT 5")
+```
+```{r}
+#selecting values with gear is 4
+dbGetQuery(conn,"Select car_names,mpg,hp,gear from tbl_mtcars where gear = 4")
+```
+```{r}
+
+#Get car names and hp where name is starting with M and cyl 6 or 8 
+#start = "val%"
+#ends ="%val"
+#contains ="%val%"
+
+dbGetQuery(conn,"select car_names,hp,cyl from tbl_mtcars where car_names Like 'M%' and cyl IN(6,8)" )
+```
+
+```{r}
+# get unique values of cyl col 
+dbGetQuery(conn,"Select distinct cyl from tbl_mtcars")
+```
+```{r}
+avg_hp = dbGetQuery(conn,"select cyl,Avg(hp) as average_hp from tbl_mtcars group by cyl  order by average_hp desc")
+
+avg_hp
+
+class(avg_hp)
+```
+```{r}
+
+#lets make 2 variable 
+mpg= 18 
+gear = 4
+
+data = dbGetQuery(conn,"select car_names,mpg,cyl,hp from tbl_mtcars where mpg>=? and gear =?" ,params=c(mpg,gear))
+data
+
+```
+```{r}
+#Inserting Record inside table
+dbExecute(conn,"insert into tbl_mtcars values(23,6,122,111,67,444,56,0,1,1,3,'Demo') ")
+```
+```{r}
+dbGetQuery(conn,"select * from tbl_mtcars")
+```
+
+```{r}
+df= data.frame(id=c(1,2,3,4),
+               name=c("abc","xyz","pqr","qwe"),
+               email=c("abc@gmail.com","xyz@gmail.com","pqr@gmail.com","qwe@gmail.com"),
+               password=c("1234","1234","1234","1234"))
+
+df
+dbWriteTable(conn,"users",df)
+```
+
+### Writting Login functionality 
+
+```{r}
+email=readline("Enter Email")
+password =readline("Enter Password")
+```
+```{r}
+data= dbGetQuery(conn,"select * from users where email=? and password =?",params=c(email,password))
+data
+
+if(nrow(data)>=1){
+  print("user is present in our system")
+}else{
+  print("user not present")
+}
+
+```
+```{r}
+name = readline("Enter Name:")
+email=readline("Enter Email:")
+password =readline("Enter Password:")
+```
+Add user in database by taking user input
+```{r}
+data= dbGetQuery(conn,"select * from users where email=?",params=c(email))
+data
+
+if(nrow(data)>=1){
+  print("User already present please enter the different mail id!")
+}else{
+  dbExecute(conn,"insert into users values(?,?,?,?)",params=c(5,name,email,password))
+  dbGetQuery(conn,"select * from users")
+}
+```
+```{r}
+#Deleting Record from table
+dbExecute(conn,"Delete from users where id='5'")
+dbGetQuery(conn,"select * from users")
+```
+
+```{r}
+#Updating Record from table
+dbExecute(conn,"update users set password='54321' where id= '4' ")
+dbGetQuery(conn,"select * from users")
+
+```
+
+```{r}
+#close the database connection 
+dbDisconnect(conn)
+```
+

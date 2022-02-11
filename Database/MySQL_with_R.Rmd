@@ -1,0 +1,66 @@
+---
+title: "MySQL with R"
+output: html_notebook
+---
+```{r}
+library(RMySQL)
+```
+```{r}
+#Creating connection to MySQL database
+my_conn = dbConnect(MySQL(),user="root",password="kira",dbname="mydb",host="localhost")
+```
+
+List of the tables present in database 
+```{r}
+dbListTables(my_conn)
+```
+Creating table 
+
+```{r}
+data("iris")
+iris
+```
+Generating a Table using iris dataset 
+```{r}
+dbWriteTable(my_conn,"tbl_iris",iris,overwrite=TRUE)
+```
+```{r}
+records=dbSendQuery(my_conn,"select * from tbl_iris")
+
+```
+Fetch return the record from resultset and converts it into dataframe
+```{r}
+fetch(records)
+```
+### Insering Records in table
+```{r}
+dbSendQuery(my_conn,"insert into tbl_iris values(151,1.2,2.3,4,5,'setosa')")
+```
+```{r}
+records=dbSendQuery(my_conn,"select * from tbl_iris")
+
+```
+
+```{r}
+fetch(records)
+```
+### Updating Record using RMySQL 
+
+```{r}
+dbSendQuery(my_conn,"update tbl_iris set species='Unknow' where row_names=151")
+```
+### Deleting Record using RMySQL 
+```{r}
+dbSendQuery(my_conn,"Delete from tbl_iris where row_names=151")
+```
+### Alter (Renaming column name )
+
+```{r}
+dbSendQuery(my_conn,"Alter table tbl_iris change column row_names  id varchar(100)")
+```
+### Dropping table from database 
+
+```{r}
+dbSendQuery(my_conn,"drop table if exists tbl_iris")
+```
+
