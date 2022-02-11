@@ -1,0 +1,120 @@
+---
+title: "Google PlayStore Data Analysis"
+output:
+  html_document:
+    df_print: paged
+    fig_width: 20
+    fig_height: 8
+---
+```{r}
+library(tidyverse)
+```
+In this problem, we will explore the Google Play Store Apps Dataset, scraped from the Google
+Play Store.
+Each row in the table is an app. Here are descriptions of some of the columns.
+
+
+1. Category Category the app belongs to
+2. Rating Overall user rating of the app (as when scraped)
+3. Reviews Number of user reviews for the app (as when scraped)
+4. Installs Number of user downloads/installs for the app (as when scraped)
+
+
+Notice that we did not set the index, even though it looks like the app name would be a good
+candidate. This is because the app names are not unique! We can verify this with the help of a
+numpy function called np.unique. This function takes in an array and outputs an array with all
+duplicates removed.
+We see above that the table has 10,825 rows. This means that there are 10,825 apps in the
+dataset. But let's calculate how many unique names there are:
+len(np.unique(apps.get('App')))
+So there must be duplicates!
+Because there are duplicates, the app name is not a good row label. In fact, there is no good row
+label in this case. In situations like this, we'll leave the index as-is.
+```{r}
+df= read.csv("F://R Scripts//Data//googleplaystore.csv")
+df
+```
+### Question 1.
+Assign by_content to a dataframe which counts the number of apps per Content
+Rating. List the Content Ratings alphabetically.
+Hint:You can use groupby
+```{r}
+by_content = df %>% group_by(Content.Rating) %>% summarise(count=n()) %>% arrange(Content.Rating)
+by_content
+```
+### Question 2.
+Compute the number of apps in the dataset that have 1.5 stars or lower, and save the
+result in bad_apps and compute the number of apps in the dataset that have 4 stars or higher,
+and
+save the results in good_apps.
+```{r}
+bad_apps=df %>%  filter(Rating<=1.5)
+bad_apps
+cat("Count of bad apps is :",nrow(bad_apps))
+unique(bad_apps$App)
+```
+```{r}
+good_apps=df %>%  filter(Rating>=4)
+good_apps
+cat("Count of Good apps is :",nrow(good_apps))
+```
+### Question 3.
+How many apps listed have the word "Google" (with that exact capitalization) in the
+App name? Save the number as google_apps.
+Note: each row is a separate App and should be counted as such (even if the names are the
+same)
+```{r}
+google_apps_df = df %>% filter(grepl("google|Google",App))
+google_apps_df
+
+google_apps= nrow(google_apps_df)
+cat("Number of Google Apps is :",google_apps)
+```
+### Question 4. 
+Of the apps under the Category COMMUNICATION, get the Content Rating count for
+apps where the Rating is between or equal to 4 and 5 (inclusive). Return this as a table sorted by
+count (with greatest count at the top of the table) called top_communication_apps.
+Hint: creating two Dataframes may help. Even though it is possible to do this in one line,
+sometimes it's better to break up the tasks to make the overall process clearer. We will only
+check the final table though.
+```{r}
+top_communication_apps = df %>% filter(Category=="COMMUNICATION" & Rating>=4 & Rating<=5) %>% group_by(Content.Rating) %>% summarise(Count=n()) %>% arrange(desc(Count))
+top_communication_apps
+```
+###Question 5.
+Create a table named install_stats which has a single column, Installs, which
+contains the mean number of install of apps in each type of content rating.
+```{r}
+df$Installs =gsub(",","",df$Installs)
+df$Installs =as.numeric(gsub("[+]","",df$Installs))
+str(df$Installs)
+
+```
+```{r}
+install_stats = df %>% group_by(Content.Rating) %>% summarise(mean_installs=mean(Installs))
+install_stats
+```
+### Question 6.
+Suppose a good app is one with at least one million installs and a rating of at least
+4.0. Create a variable called best_category containing the name of the category with the best apps.
+
+```{r}
+best_category_df = df %>% filter(Rating>=4 & Installs >=1000000) %>% arrange(Installs)
+best_category_df 
+
+best_category = unique(best_category_df$Category)
+best_category
+```
+### Question 7.
+Make a bar chart of the average rating by category in which the bars are sorted from smallest to largest
+
+```{r}
+data= df %>% group_by(Category) %>% summarise(average_rating=mean(Rating,na.rm=TRUE)) %>% arrange(average_rating)
+data
+```
+```{r}
+ggplot(data,aes(x=reorder(Category,average_rating),y=average_rating,color=Category)) + geom_bar(stat="identity")
+```
+
+
+
